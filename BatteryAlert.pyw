@@ -1,13 +1,25 @@
 import psutil
 import winsound
-from tkinter import messagebox, Tk
+import tkinter as tk
 import time
 
-def show_alert(title, message, sound_freq):
+def show_overlay_message(message, sound_freq):
     winsound.Beep(sound_freq, 1000)  # Beep for 1 second
-    root = Tk()
-    root.withdraw()
-    messagebox.showinfo(title, message)
+
+    overlay = tk.Tk()
+    overlay.attributes('-topmost', True)  # Always on top
+    overlay.overrideredirect(True)        # Remove borders
+    overlay.geometry("+500+300")          # Position (adjust if needed)
+    overlay.configure(bg='black')
+    overlay.wm_attributes('-alpha', 0.8)  # Transparency
+
+    label = tk.Label(overlay, text=message, fg='white', bg='black',
+                     font=('Helvetica', 24, 'bold'))
+    label.pack(ipadx=30, ipady=20)
+
+    # Auto-close after 8 seconds
+    overlay.after(8000, overlay.destroy)
+    overlay.mainloop()
 
 def battery_monitor():
     already_alerted_low = False
@@ -23,12 +35,12 @@ def battery_monitor():
 
         if percent <= 23 and not plugged:
             if not already_alerted_low:
-                show_alert("Battery Low", f"Battery is at {percent}%. Please plug in the charger.", 1000)
+                show_overlay_message(f"⚠ Battery Low: {percent}%", 1000)
                 already_alerted_low = True
                 already_alerted_full = False  # Reset full alert
         elif percent >= 88 and plugged:
             if not already_alerted_full:
-                show_alert("Battery Full", f"Battery is at {percent}%. You may unplug the charger.", 1500)
+                show_overlay_message(f"✔ Battery Full: {percent}%", 1500)
                 already_alerted_full = True
                 already_alerted_low = False  # Reset low alert
         else:
