@@ -38,6 +38,6 @@ def battery_monitor():
             already_alerted_low = False
             already_alerted_full = False
 
-        time.sleep(120)
+        time.sleep(60)
 
 battery_monitor()
